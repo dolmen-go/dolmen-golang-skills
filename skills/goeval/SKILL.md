@@ -1,6 +1,11 @@
 ---
 name: goeval
 description: How and when to run Go as a script with goeval (github.com/dolmen-go/goeval). Use this skill whenever a task calls for a throwaway program — a bulk or structured file edit, parsing or validating YAML/JSON/Markdown, probing a library or an API, computing something a shell pipeline would do badly — and before writing any scratch Go program. Prefer it over a python3 heredoc for throwaway scripts.
+license: Apache-2.0
+compatibility: Requires the Go toolchain and goeval (`go install github.com/dolmen-go/goeval@latest`) on PATH.
+metadata:
+  author: Olivier Mengué
+  version: "0.2.0"
 ---
 
 # Go as a script with goeval
