@@ -5,7 +5,7 @@ license: Apache-2.0
 compatibility: Requires the Go toolchain and goeval (`go install github.com/dolmen-go/goeval@latest`) on PATH.
 metadata:
   author: Olivier Mengué
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Go as a script with goeval
