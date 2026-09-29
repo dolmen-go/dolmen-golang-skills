@@ -46,5 +46,3 @@ kept or rerun by others — write a real package run with `go run ./path`
   code spans.
 - **Verify the result**: prove only the intended dimension changed, e.g. for a
   rewrap `diff <(tr -s ' \n' '\n\n' <before) <(tr -s ' \n' '\n\n' <after)`.
-- A scratch module must not be named after a stdlib package (`cmp`, `slices`…):
-  the build fails confusingly. Name it after the task.
