@@ -29,7 +29,13 @@ retrieval for a symbol you don't have in context yet. Benchmarked against
 `strings.ToUpper`, `go doc -src` was ~35-45x faster and needed one exact tool
 call versus two-plus imprecise ones via `gopls`.
 
-More skills will be added here over time.
+### [goeval](./skills/goeval/SKILL.md)
+
+Use Go, not Python, as the scripting language for throwaway programs — bulk or
+structured file edits, parsing and validating YAML/JSON/Markdown, probing a
+library or an API — by running the body of `main` directly with
+[goeval](https://github.com/dolmen-go/goeval), without a module, a file or any
+boilerplate.
 
 ## Install (Claude Code)
 
