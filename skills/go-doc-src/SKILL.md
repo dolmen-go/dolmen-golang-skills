@@ -5,7 +5,7 @@ license: Apache-2.0
 compatibility: Requires the Go toolchain (the `go` command) on PATH.
 metadata:
   author: Olivier Mengué
-  version: "1.0.0"
+  version: "0.2.0"
 ---
 
 # Go doc source lookup
