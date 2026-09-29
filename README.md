@@ -14,11 +14,10 @@ type, method, const, or var in another package, a dependency, or the standard
 library — using `go doc -src` instead of guessing from the name or hunting
 down the file by hand.
 
-It also documents a caveat verified against real `go doc` behavior: symbol
-lookups are case-insensitive, so a lookup can silently return a different
-symbol than the one you asked for (e.g. `net/http.client` resolves to the
-exported `http.Client`). The skill tells the agent to check the returned
-declaration's exact name before trusting it.
+It also covers a `go doc` pitfall: lower-case letters in a lookup match
+either case, so a lookup can silently return a different symbol than the one
+you asked for (e.g. `net/http.client` resolves to the exported `http.Client`).
+The skill tells the agent to use `-c` for exact-case matching.
 
 Neither the official Claude Code marketplace nor the community Go-skill
 collections found at the time of writing (e.g. `samber/cc-skills-golang`)

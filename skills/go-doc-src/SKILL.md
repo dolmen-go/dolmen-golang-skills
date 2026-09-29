@@ -34,24 +34,21 @@ Without `-u`, `go doc` only resolves exported identifiers — looking up an unex
 one fails with `doc: no symbol <name> in package <pkg>`. Add `-u` to also match
 unexported identifiers (it still matches exported ones too).
 
-## Case-insensitivity caveat — verify the match
+## Case matching — use `-c` for an exact name
 
-`go doc` matches symbol names **case-insensitively**. A lookup for `strings.toupper`
-(lowercase) silently returns the source of `strings.ToUpper`, and even with `-u`,
-`net/http.client` (lowercase) returns the exported `http.Client`, not a distinct
-unexported `client` if one existed. This was verified directly against `go doc -src`
-(Go 1.27) — it is not an assumption.
+By default, lower-case letters in the argument match either case, while upper-case
+letters match exactly. So `net/http.client` (even with `-u`) silently returns the
+exported `http.Client`, and a lower-case query matching several symbols prints all
+of them.
 
-Practical implications:
+When you know the exact identifier, add `-c` to respect case:
 
-- If you ask for a symbol by exact name/case, **check the printed declaration's name
-  matches what you asked for** before treating the output as authoritative — you may
-  have been handed a different symbol that merely differs in case.
-- This is especially relevant when both an exported and unexported symbol share a
-  name differing only in case (e.g. `Client` / `client`) — `go doc` does not
-  guarantee which one you get, so don't assume case alone disambiguates.
-- If the printed symbol doesn't match, or you need the exact-case one specifically,
-  fall back to grepping the resolved package directory for the precise identifier.
+```
+go doc -src -u -c <pkg>.<symbol>
+```
+
+With `-c`, a symbol that doesn't exist with that exact case fails with
+`doc: no symbol <name> in package <pkg>` instead of returning a different one.
 
 ## When to reach for this vs. reading the file directly
 
