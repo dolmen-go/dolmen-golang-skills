@@ -28,7 +28,7 @@
       "strict": false,
       "skills": ["./skills/goeval"],
       "description": "Script in Go instead of Python: run throwaway programs (bulk file edits, YAML/JSON parsing, API probes) with goeval, no module or boilerplate needed.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Olivier Mengué"
       },
