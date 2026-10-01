@@ -20,5 +20,9 @@ jobs:
       - name: Validate marketplace manifest
         run: claude plugin validate . --strict
 
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
       - name: Check each skill is an independent strict:false plugin
-        run: bash .github/scripts/check-independent-skills.sh
+        run: go -C .github/scripts/check-skills-meta run . "$PWD"
