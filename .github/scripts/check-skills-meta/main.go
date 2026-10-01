@@ -4,6 +4,11 @@
 // with "strict": false (no plugin.json, marketplace entry is the sole
 // authority — see README/architecture notes).
 //
+// Each skill's SKILL.md frontmatter must also agree with its plugin entry:
+// "name" matches the skill directory and the plugin name, and "license",
+// "metadata.author" and "metadata.version" match the plugin's "license",
+// "author.name" and "version".
+//
 // Usage, from the repository root:
 //
 //	go -C .github/scripts/check-skills-meta run . "$PWD"
@@ -15,23 +20,63 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"go.yaml.in/yaml/v3"
 )
 
 const marketplacePath = ".claude-plugin/marketplace.json"
 
 type marketplace struct {
 	Plugins []struct {
-		Name   string   `json:"name"`
+		Name    string `json:"name"`
+		Version string `json:"version"`
+		License string `json:"license"`
+		Author  struct {
+			Name string `json:"name"`
+		} `json:"author"`
 		Strict *bool    `json:"strict"`
 		Skills []string `json:"skills"`
 	} `json:"plugins"`
+}
+
+// frontmatter is the subset of SKILL.md frontmatter that must agree with
+// marketplace.json.
+type frontmatter struct {
+	Name     string `yaml:"name"`
+	License  string `yaml:"license"`
+	Metadata struct {
+		Author  string `yaml:"author"`
+		Version string `yaml:"version"`
+	} `yaml:"metadata"`
+}
+
+func readFrontmatter(path string) (*frontmatter, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	rest, ok := bytes.CutPrefix(data, []byte("---\n"))
+	if !ok {
+		return nil, errors.New("missing frontmatter")
+	}
+	block, _, ok := bytes.Cut(rest, []byte("\n---\n"))
+	if !ok {
+		return nil, errors.New("unterminated frontmatter")
+	}
+	var fm frontmatter
+	if err := yaml.Unmarshal(block, &fm); err != nil {
+		return nil, fmt.Errorf("frontmatter: %v", err)
+	}
+	return &fm, nil
 }
 
 func main() {
@@ -108,8 +153,39 @@ func main() {
 	report("Skill directories with no plugin entry", missing)
 	report("Plugin entries reference a nonexistent skill directory", extra)
 
+	// 4. Each skill's frontmatter must agree with its plugin entry.
+	for _, p := range m.Plugins {
+		if len(p.Skills) != 1 {
+			continue // reported by check 2
+		}
+		dir := filepath.Clean(p.Skills[0])
+		path := filepath.Join(dir, "SKILL.md")
+		if !slices.Contains(skillFiles, path) {
+			continue // reported by check 3
+		}
+		annotate := func(msg string) {
+			fmt.Printf("::error file=%s::%s\n", path, msg)
+			fail = true
+		}
+		fm, err := readFrontmatter(path)
+		if err != nil {
+			annotate(err.Error())
+			continue
+		}
+		check := func(field, got, ref, want string) {
+			if got != want {
+				annotate(fmt.Sprintf("frontmatter %s %q does not match %s %q", field, got, ref, want))
+			}
+		}
+		check("name", fm.Name, "skill directory", filepath.Base(dir))
+		check("name", fm.Name, "plugin name", p.Name)
+		check("license", fm.License, "plugin license", p.License)
+		check("metadata.author", fm.Metadata.Author, "plugin author.name", p.Author.Name)
+		check("metadata.version", fm.Metadata.Version, "plugin version", p.Version)
+	}
+
 	if fail {
 		os.Exit(1)
 	}
-	fmt.Println("All skills are declared as independent, strict:false plugin entries.")
+	fmt.Println("All skills are declared as independent, strict:false plugin entries, with matching frontmatter.")
 }
